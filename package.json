@@ -1,0 +1,49 @@
+{
+  "name": "kinesis-client-library",
+  "version": "0.3.5",
+  "description": "Process Kinesis streams and automatically scale up or down as shards split or merge.",
+  "main": "build/index.js",
+  "typings": "build/index",
+  "scripts": {
+    "test": "npm run lint && mocha",
+    "quick-test": "tsc && npm run lint",
+    "lint": "tslint src/*.ts src/lib/**/*.ts",
+    "clean": "rm -rf build",
+    "build": "npm run clean && npm run tsd && tsc",
+    "tsd-clean": "rm -rf src/typings",
+    "tsd": "npm run tsd-clean && tsd reinstall && tsd rebundle",
+    "prepublish": "npm run build"
+  },
+  "author": "Evan Solomon",
+  "license": "MIT",
+  "bin": {
+    "launch-kinesis-cluster": "./bin/launch"
+  },
+  "homepage": "https://github.com/evansolomon/nodejs-kinesis-client-library",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/evansolomon/nodejs-kinesis-client-library.git"
+  },
+  "bugs": {
+    "url": "https://github.com/evansolomon/nodejs-kinesis-client-library/issues"
+  },
+  "keywords": [
+    "aws",
+    "kinesis"
+  ],
+  "dependencies": {
+    "async": "^0.9.0",
+    "aws-sdk": "^2.0.29",
+    "bunyan": "^1.2.3",
+    "kinesalite": "^1.0.2",
+    "minimist": "^1.1.0",
+    "mkdirp": "^0.5.1",
+    "underscore": "^1.7.0"
+  },
+  "devDependencies": {
+    "mocha": "^2.2.1",
+    "tsd": "^0.6.5",
+    "tslint": "^3.5.0",
+    "typescript": "^1.8.7"
+  }
+}
