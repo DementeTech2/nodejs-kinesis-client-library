@@ -1,6 +1,5 @@
 node_modules
 .scratch
 npm-debug.log
-build
 src/typings
 .idea

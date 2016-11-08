@@ -276,10 +276,11 @@ export class ConsumerCluster extends EventEmitter {
       let leaseItem = item.leaseItem;
       let checkLease = find(this.leases, (lease) => lease.shardId == leaseItem.shardId );
 
-      if ( checkLease )
+      if ( checkLease ) {
         this.leases[indexOf(this.leases, checkLease)] = leaseItem;
-      else
+      } else {
         this.leases.push(leaseItem);
+      }
     });
   }
 
@@ -329,7 +330,7 @@ export class ConsumerCluster extends EventEmitter {
 
     const fetchThenWait = done => {
         if(this.isShuttingDownFromError) {
-          return done(new Error("Is shutting down"));
+          return done(new Error('Is shutting down'));
         }
 
         this.fetchAvailableShard();
