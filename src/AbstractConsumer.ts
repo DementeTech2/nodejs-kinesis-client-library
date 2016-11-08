@@ -12,7 +12,6 @@ interface AbstractConsumerOpts {
   streamName: string;
   shardId: string;
   leaseCounter?: number;
-  tableName: string;
   awsConfig: ClientConfig;
   startingIteratorType?: string;
   dynamoEndpoint?: string;
@@ -61,7 +60,6 @@ export class AbstractConsumer {
     callback();
   }
 
-  // Process a batch of records. This method, or processResponse, must be implemented by the child.
   // Process a batch of records. This method, or processResponse, must be implemented by the child.
   public processRecords(records: kinesis.Record[], callback: ProcessRecordsCallback) {
     throw new Error('processRecords must be defined by the consumer class');
@@ -183,9 +181,8 @@ export class AbstractConsumer {
   private setupLease() {
     const id = this.opts.shardId;
     const leaseCounter = this.opts.leaseCounter || null;
-    const tableName = this.opts.tableName;
 
-    this.log({ leaseCounter: leaseCounter, tableName: tableName }, 'Setting up lease');
+    this.log({ leaseCounter: leaseCounter}, 'Setting up lease');
 
     this.lease = new Lease(id, leaseCounter);
   }

@@ -14,18 +14,18 @@
     "tsd": "npm run tsd-clean && tsd reinstall && tsd rebundle",
     "prepublish": "npm run build"
   },
-  "author": "Evan Solomon",
+  "author": "Oscar Plaza",
   "license": "MIT",
   "bin": {
     "launch-kinesis-cluster": "./bin/launch"
   },
-  "homepage": "https://github.com/evansolomon/nodejs-kinesis-client-library",
+  "homepage": "https://github.com/dementetech2/nodejs-kinesis-client-library",
   "repository": {
     "type": "git",
-    "url": "git://github.com/evansolomon/nodejs-kinesis-client-library.git"
+    "url": "git://github.com/dementetech2/nodejs-kinesis-client-library.git"
   },
   "bugs": {
-    "url": "https://github.com/evansolomon/nodejs-kinesis-client-library/issues"
+    "url": "https://github.com/dementetech2/nodejs-kinesis-client-library/issues"
   },
   "keywords": [
     "aws",

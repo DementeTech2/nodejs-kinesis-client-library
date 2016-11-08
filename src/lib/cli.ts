@@ -12,7 +12,6 @@ import {ConsumerCluster} from '../ConsumerCluster'
 interface KinesisCliArgs extends minimist.ParsedArgs {
   help: Boolean
   consumer: string
-  table: string
   stream: string
   'start-at'?: string
   capacity?: {
@@ -30,11 +29,11 @@ interface KinesisCliArgs extends minimist.ParsedArgs {
   'time-between-reads'?: number
 }
 
-const args = <KinesisCliArgs>minimist(process.argv.slice(2))
+const args = <KinesisCliArgs>minimist(process.argv.slice(2));
 const logger = createLogger({
   name: 'KinesisClusterCLI',
   level: args['log-level']
-})
+});
 
 if (args.help) {
   console.log(`
@@ -44,7 +43,6 @@ if (args.help) {
 
     Required flags:
     --consumer [Path to consumer file]
-    --table [DynamoDB table name]
     --stream [Kinesis stream name]
 
     Optional flags:
@@ -59,13 +57,12 @@ if (args.help) {
     --local-kinesis-no-start (Assume a local Kinesis server is already running, defaults to false)
     --num-records (Maximum number of records to get in each Kinesis query, defaults to the Kinesis maximum of 10000)
     --time-between-reads (Time to wait between fetching records in milliseconds, defaults to 1000)
-  `)
-  process.exit()
+  `);
+  process.exit();
 }
 
-const consumer = resolve(process.cwd(), args.consumer || '')
+const consumer = resolve(process.cwd(), args.consumer || '');
 const opts = {
-  tableName: args.table,
   streamName: args.stream,
   awsConfig: args.aws,
   startingIteratorType: args['start-at'],
@@ -76,17 +73,17 @@ const opts = {
   logLevel: args['log-level'],
   numRecords: args['num-records'],
   timeBetweenReads: args['time-between-reads'],
-}
+};
 
-logger.info('Consumer app path:', consumer)
+logger.info('Consumer app path:', consumer);
 const clusterOpts = Object.keys(opts).reduce((memo, key) => {
   if (opts[key] !== undefined) {
     memo[key] = opts[key]
   }
 
   return memo
-}, {})
-logger.info({ options: clusterOpts }, 'Cluster options')
+}, {});
+logger.info({ options: clusterOpts }, 'Cluster options');
 
 auto({
   localKinesis: done => {
@@ -97,63 +94,63 @@ auto({
       return done()
     }
 
-    const port = args['local-kinesis-port'] || config.localKinesisEndpoint.port
+    const port = args['local-kinesis-port'] || config.localKinesisEndpoint.port;
 
     const proc = spawn('./node_modules/.bin/kinesalite', [
       '--port', port.toString()
     ], {
         cwd: resolve(__dirname, '../..')
-      })
+      });
 
     proc.on('error', err => {
-      logger.error(err, 'Error in local Kinesis')
-      process.exit(1)
-    })
+      logger.error(err, 'Error in local Kinesis');
+      process.exit(1);
+    });
 
     const timer = setTimeout(() => {
       done(new Error('Local Kinesis took too long to start'))
-    }, 5000)
+    }, 5000);
 
-    let output = ''
+    let output = '';
     proc.stdout.on('data', chunk => {
-      output += chunk
+      output += chunk;
       if (output.indexOf('Listening') === -1) {
         return
       }
 
-      done()
-      done = () => { /* Don't call twice */ }
-      clearTimeout(timer)
+      done();
+      done = () => { /* Don't call twice */ };
+      clearTimeout(timer);
     })
   },
   cluster: ['localKinesis', done => {
-    logger.info('Launching cluster')
+    logger.info('Launching cluster');
     let cluster;
     try {
-      cluster = new ConsumerCluster(consumer, opts)
+      cluster = new ConsumerCluster(consumer, opts);
     } catch (e) {
-      logger.error('Error launching cluster')
-      logger.error(e)
-      process.exit(1)
+      logger.error('Error launching cluster');
+      logger.error(e);
+      process.exit(1);
     }
 
     //logger.info('Spawned cluster %s', cluster.cluster.id)
 
     if (args.http) {
-      let port
+      let port;
       if (typeof args.http === 'number') {
         port = args.http
       } else {
-        port = process.env.PORT
+        port = process.env.PORT;
       }
 
-      logger.info('Spawning HTTP server on port %d', port)
-      cluster.serveHttp(port)
+      logger.info('Spawning HTTP server on port %d', port);
+      cluster.serveHttp(port);
     }
   }]
 }, err => {
   if (err) {
-    logger.error(err)
-    process.exit(1)
+    logger.error(err);
+    process.exit(1);
   }
-})
+});

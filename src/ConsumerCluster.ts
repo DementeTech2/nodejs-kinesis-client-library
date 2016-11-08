@@ -26,7 +26,6 @@ interface AWSEndpoints {
 
 export interface ConsumerClusterOpts {
   streamName: string;
-  tableName: string;
   awsConfig: ClientConfig;
   kinesisEndpoint?: string;
   localKinesis: Boolean;
@@ -237,7 +236,6 @@ export class ConsumerCluster extends EventEmitter {
   private spawn(shardId: string, leaseCounter: number) {
     this.logger.info({ shardId: shardId, leaseCounter: leaseCounter }, 'Spawning consumer');
     const consumerOpts = {
-      tableName: this.opts.tableName,
       awsConfig: this.opts.awsConfig,
       streamName: this.opts.streamName,
       startingIteratorType: (this.opts.startingIteratorType || '').toUpperCase(),
