@@ -12,7 +12,6 @@ import config from './lib/config';
 import {listShards, createKinesisClient} from './lib/aws/kinesis';
 import {Lease} from './lib/models/Lease';
 import {Stream} from './lib/models/Stream';
-import {create as createServer} from './lib/server';
 
 declare var clearTimeout;
 
@@ -47,6 +46,8 @@ export class ConsumerCluster extends EventEmitter {
   private consumers = {};
   private consumerIds = [];
   private endpoints: AWSEndpoints;
+  private running: boolean = false;
+  private loopTimer: number;
 
   constructor(pathToConsumer: string, opts: ConsumerClusterOpts) {
     super();
@@ -70,7 +71,11 @@ export class ConsumerCluster extends EventEmitter {
     this.init();
   }
 
-  private init() {
+  public init() {
+
+    this.running = true;
+    this.isShuttingDownFromError = false;
+
     auto({
       createStream: done => {
         const streamName = this.opts.streamName;
@@ -115,12 +120,6 @@ export class ConsumerCluster extends EventEmitter {
     }
 
     return endpoint
-  }
-
-  // Run an HTTP server. Useful as a health check.
-  public serveHttp(port: string | number) {
-    this.logger.debug('Starting HTTP server on port %s', port);
-    createServer(port, () => this.consumerIds.length)
   }
 
   private bindListeners() {
@@ -334,7 +333,7 @@ export class ConsumerCluster extends EventEmitter {
         }
 
         this.fetchAvailableShard();
-        setTimeout(done, 5000);
+        this.loopTimer = setTimeout(done, 5000);
     };
 
     const handleError = err => {
@@ -342,6 +341,18 @@ export class ConsumerCluster extends EventEmitter {
     };
 
     forever(fetchThenWait, handleError)
+  }
+
+  public shutDown(){
+    this.logAndEmitError(new Error('Killed by parent'));
+  }
+
+  public getStatus(){
+    return {
+      status: this.running,
+      countProcess: this.consumerIds.length,
+      stream: this.opts.streamName
+    }
   }
 
   private logAndEmitError(err: Error, desc?: string) {
@@ -353,6 +364,7 @@ export class ConsumerCluster extends EventEmitter {
       return;
     }
 
+    this.running = false;
     this.isShuttingDownFromError = true;
 
     // Kill all consumers and then emit an error so that the cluster can be re-spawned

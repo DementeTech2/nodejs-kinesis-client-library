@@ -14,7 +14,6 @@ var bunyan_1 = require('bunyan');
 var config_1 = require('./lib/config');
 var kinesis_1 = require('./lib/aws/kinesis');
 var Stream_1 = require('./lib/models/Stream');
-var server_1 = require('./lib/server');
 // Cluster of consumers.
 var ConsumerCluster = (function (_super) {
     __extends(ConsumerCluster, _super);
@@ -24,6 +23,7 @@ var ConsumerCluster = (function (_super) {
         this.leases = [];
         this.consumers = {};
         this.consumerIds = [];
+        this.running = false;
         this.opts = opts;
         this.logger = bunyan_1.createLogger({
             name: 'KinesisCluster',
@@ -41,6 +41,8 @@ var ConsumerCluster = (function (_super) {
     }
     ConsumerCluster.prototype.init = function () {
         var _this = this;
+        this.running = true;
+        this.isShuttingDownFromError = false;
         async_1.auto({
             createStream: function (done) {
                 var streamName = _this.opts.streamName;
@@ -79,12 +81,6 @@ var ConsumerCluster = (function (_super) {
             endpoint = customEndpoint;
         }
         return endpoint;
-    };
-    // Run an HTTP server. Useful as a health check.
-    ConsumerCluster.prototype.serveHttp = function (port) {
-        var _this = this;
-        this.logger.debug('Starting HTTP server on port %s', port);
-        server_1.create(port, function () { return _this.consumerIds.length; });
     };
     ConsumerCluster.prototype.bindListeners = function () {
         var _this = this;
@@ -262,12 +258,22 @@ var ConsumerCluster = (function (_super) {
                 return done(new Error('Is shutting down'));
             }
             _this.fetchAvailableShard();
-            setTimeout(done, 5000);
+            _this.loopTimer = setTimeout(done, 5000);
         };
         var handleError = function (err) {
             _this.logAndEmitError(err, 'Error fetching external network data');
         };
         async_1.forever(fetchThenWait, handleError);
+    };
+    ConsumerCluster.prototype.shutDown = function () {
+        this.logAndEmitError(new Error('Killed by parent'));
+    };
+    ConsumerCluster.prototype.getStatus = function () {
+        return {
+            status: this.running,
+            countProcess: this.consumerIds.length,
+            stream: this.opts.streamName
+        };
     };
     ConsumerCluster.prototype.logAndEmitError = function (err, desc) {
         var _this = this;
@@ -277,6 +283,7 @@ var ConsumerCluster = (function (_super) {
         if (this.isShuttingDownFromError) {
             return;
         }
+        this.running = false;
         this.isShuttingDownFromError = true;
         // Kill all consumers and then emit an error so that the cluster can be re-spawned
         this.killAllConsumers(function (killErr) {

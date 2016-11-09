@@ -47,7 +47,6 @@ if (args.help) {
 
     Optional flags:
     --start-at [Starting iterator type] ("trim_horizon" or "latest", defaults to "trim_horizon")
-    --capacity.[read|write] [Throughput] (DynamoDB throughput for *new* tables, defaults to 10 for each)
     --aws.[option] [Option value]  (e.g. --aws.region us-west-2)
     --http [port]  (Start HTTP server, port defaults to $PORT)
     --log-level [level] (Logging verbosity, uses Bunyan log levels)
@@ -66,7 +65,6 @@ const opts = {
   streamName: args.stream,
   awsConfig: args.aws,
   startingIteratorType: args['start-at'],
-  capacity: args.capacity,
   kinesisEndpoint: args['kinesis-endpoint'],
   localKinesis: !!args['local-kinesis'],
   localKinesisPort: args['local-kinesis-port'],

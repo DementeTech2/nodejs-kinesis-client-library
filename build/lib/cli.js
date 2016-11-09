@@ -12,7 +12,7 @@ var logger = bunyan_1.createLogger({
     level: args['log-level']
 });
 if (args.help) {
-    console.log("\n    Usage:\n\n    --help  (Display this message)\n\n    Required flags:\n    --consumer [Path to consumer file]\n    --stream [Kinesis stream name]\n\n    Optional flags:\n    --start-at [Starting iterator type] (\"trim_horizon\" or \"latest\", defaults to \"trim_horizon\")\n    --capacity.[read|write] [Throughput] (DynamoDB throughput for *new* tables, defaults to 10 for each)\n    --aws.[option] [Option value]  (e.g. --aws.region us-west-2)\n    --http [port]  (Start HTTP server, port defaults to $PORT)\n    --log-level [level] (Logging verbosity, uses Bunyan log levels)\n    --kinesis-endpoint (Use a custom endpoint for the Kinesis service)\n    --local-kinesis (Use a local implementation of Kinesis, defaults to false)\n    --local-kinesis-port (Port to access local Kinesis on, defaults to 4567)\n    --local-kinesis-no-start (Assume a local Kinesis server is already running, defaults to false)\n    --num-records (Maximum number of records to get in each Kinesis query, defaults to the Kinesis maximum of 10000)\n    --time-between-reads (Time to wait between fetching records in milliseconds, defaults to 1000)\n  ");
+    console.log("\n    Usage:\n\n    --help  (Display this message)\n\n    Required flags:\n    --consumer [Path to consumer file]\n    --stream [Kinesis stream name]\n\n    Optional flags:\n    --start-at [Starting iterator type] (\"trim_horizon\" or \"latest\", defaults to \"trim_horizon\")\n    --aws.[option] [Option value]  (e.g. --aws.region us-west-2)\n    --http [port]  (Start HTTP server, port defaults to $PORT)\n    --log-level [level] (Logging verbosity, uses Bunyan log levels)\n    --kinesis-endpoint (Use a custom endpoint for the Kinesis service)\n    --local-kinesis (Use a local implementation of Kinesis, defaults to false)\n    --local-kinesis-port (Port to access local Kinesis on, defaults to 4567)\n    --local-kinesis-no-start (Assume a local Kinesis server is already running, defaults to false)\n    --num-records (Maximum number of records to get in each Kinesis query, defaults to the Kinesis maximum of 10000)\n    --time-between-reads (Time to wait between fetching records in milliseconds, defaults to 1000)\n  ");
     process.exit();
 }
 var consumer = path_1.resolve(process.cwd(), args.consumer || '');
@@ -20,7 +20,6 @@ var opts = {
     streamName: args.stream,
     awsConfig: args.aws,
     startingIteratorType: args['start-at'],
-    capacity: args.capacity,
     kinesisEndpoint: args['kinesis-endpoint'],
     localKinesis: !!args['local-kinesis'],
     localKinesisPort: args['local-kinesis-port'],
