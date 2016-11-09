@@ -258,15 +258,24 @@ var ConsumerCluster = (function (_super) {
                 return done(new Error('Is shutting down'));
             }
             _this.fetchAvailableShard();
-            _this.loopTimer = setTimeout(done, 5000);
+            setTimeout(done, 5000);
         };
         var handleError = function (err) {
             _this.logAndEmitError(err, 'Error fetching external network data');
         };
         async_1.forever(fetchThenWait, handleError);
     };
-    ConsumerCluster.prototype.shutDown = function () {
-        this.logAndEmitError(new Error('Killed by parent'));
+    ConsumerCluster.prototype.shutDown = function (callback) {
+        var _this = this;
+        this.running = false;
+        this.isShuttingDownFromError = true;
+        // Kill all consumers and then emit an error so that the cluster can be re-spawned
+        this.killAllConsumers(function (killErr) {
+            if (killErr) {
+                _this.logger.error(killErr);
+            }
+            callback();
+        });
     };
     ConsumerCluster.prototype.getStatus = function () {
         return {

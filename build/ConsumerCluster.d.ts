@@ -21,7 +21,6 @@ export declare class ConsumerCluster extends EventEmitter {
     private consumerIds;
     private endpoints;
     private running;
-    private loopTimer;
     constructor(pathToConsumer: string, opts: ConsumerClusterOpts);
     init(): void;
     private getKinesisEndpoint();
@@ -32,7 +31,7 @@ export declare class ConsumerCluster extends EventEmitter {
     private killConsumerById(id, callback);
     private killAllConsumers(callback);
     private loopFetchAvailableShards();
-    shutDown(): void;
+    shutDown(callback: any): void;
     getStatus(): {
         status: boolean;
         countProcess: number;
