@@ -47,7 +47,6 @@ export class ConsumerCluster extends EventEmitter {
   private consumerIds = [];
   private endpoints: AWSEndpoints;
   private running: boolean = false;
-  private loopTimer: number;
 
   constructor(pathToConsumer: string, opts: ConsumerClusterOpts) {
     super();
@@ -333,7 +332,7 @@ export class ConsumerCluster extends EventEmitter {
         }
 
         this.fetchAvailableShard();
-        this.loopTimer = setTimeout(done, 5000);
+        setTimeout(done, 5000);
     };
 
     const handleError = err => {
@@ -343,8 +342,19 @@ export class ConsumerCluster extends EventEmitter {
     forever(fetchThenWait, handleError)
   }
 
-  public shutDown(){
-    this.logAndEmitError(new Error('Killed by parent'));
+  public shutDown(callback) {
+
+    this.running = false;
+    this.isShuttingDownFromError = true;
+
+    // Kill all consumers and then emit an error so that the cluster can be re-spawned
+    this.killAllConsumers((killErr?: Error) => {
+      if (killErr) {
+        this.logger.error(killErr);
+      }
+
+      callback();
+    });
   }
 
   public getStatus(){
